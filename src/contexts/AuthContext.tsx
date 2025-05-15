@@ -30,6 +30,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   useEffect(() => {
+    // Skip Supabase operations if client is not initialized
+    if (!supabase) {
+      setLoading(false);
+      return;
+    }
+
     // Check active sessions and set the user
     const getSession = async () => {
       const { data, error } = await supabase.auth.getSession();
@@ -66,6 +72,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with email and password
   const login = async (email: string, password: string) => {
+    if (!supabase) {
+      toast({
+        title: "Service unavailable",
+        description: "Authentication service is not available. Please check your environment configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -89,6 +104,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Login with Google
   const googleLogin = async () => {
+    if (!supabase) {
+      toast({
+        title: "Service unavailable",
+        description: "Authentication service is not available. Please check your environment configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
@@ -116,6 +140,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Logout
   const logout = async () => {
+    if (!supabase) {
+      toast({
+        title: "Service unavailable",
+        description: "Authentication service is not available. Please check your environment configuration.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
     try {
       const { error } = await supabase.auth.signOut();

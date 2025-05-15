@@ -13,7 +13,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
-export const supabase = createClient<Database>(
-  supabaseUrl as string, 
-  supabaseAnonKey as string
-);
+// Only create the client if both URL and key are available
+export const supabase = (supabaseUrl && supabaseAnonKey) 
+  ? createClient<Database>(supabaseUrl, supabaseAnonKey)
+  : null as any; // This allows the app to initialize but Supabase calls will fail gracefully
+

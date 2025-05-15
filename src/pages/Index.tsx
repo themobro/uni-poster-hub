@@ -5,11 +5,15 @@ import Footer from '@/components/Footer';
 import SearchBar from '@/components/SearchBar';
 import PosterCard from '@/components/PosterCard';
 import { posters as allPosters } from '@/data/posters';
+import { FilterOptions } from '@/components/SearchBar';
 
 const Index = () => {
   const [posters, setPosters] = useState(allPosters);
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [filters, setFilters] = useState<FilterOptions>({
+    categories: [],
+    keywords: []
+  });
 
   useEffect(() => {
     let filteredPosters = allPosters;
@@ -25,21 +29,56 @@ const Index = () => {
     }
 
     // Filter by selected categories
-    if (selectedCategories.length > 0) {
+    if (filters.categories.length > 0) {
       filteredPosters = filteredPosters.filter(poster => 
-        selectedCategories.includes(poster.category)
+        filters.categories.includes(poster.category)
+      );
+    }
+
+    // Filter by post date range (using uploadedAt)
+    if (filters.postDateStart) {
+      filteredPosters = filteredPosters.filter(poster => 
+        new Date(poster.uploadedAt) >= new Date(filters.postDateStart!)
+      );
+    }
+
+    if (filters.postDateEnd) {
+      filteredPosters = filteredPosters.filter(poster => 
+        new Date(poster.uploadedAt) <= new Date(filters.postDateEnd!)
+      );
+    }
+
+    // Filter by event date range (using date field)
+    if (filters.eventDateStart) {
+      filteredPosters = filteredPosters.filter(poster => 
+        new Date(poster.date) >= new Date(filters.eventDateStart!)
+      );
+    }
+
+    if (filters.eventDateEnd) {
+      filteredPosters = filteredPosters.filter(poster => 
+        new Date(poster.date) <= new Date(filters.eventDateEnd!)
+      );
+    }
+
+    // Filter by keywords
+    if (filters.keywords.length > 0) {
+      filteredPosters = filteredPosters.filter(poster => 
+        filters.keywords.some(keyword => 
+          poster.keywords.some(k => k.toLowerCase().includes(keyword.toLowerCase()))
+        )
       );
     }
 
     setPosters(filteredPosters);
-  }, [searchQuery, selectedCategories]);
+  }, [searchQuery, filters]);
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
   };
 
-  const handleFilter = (categories: string[]) => {
-    setSelectedCategories(categories);
+  const handleFilter = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
   };
 
   return (
